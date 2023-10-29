@@ -79,6 +79,7 @@ class TestAmenity(unittest.TestCase):
     def test_to_dict_creates_dict(self):
         """test to_dict method creates a dictionary with proper attrs"""
         am = Amenity()
+        """print(am.__dict__)"""
         new_d = am.to_dict()
         self.assertEqual(type(new_d), dict)
         self.assertFalse("_sa_instance_state" in new_d)
@@ -89,7 +90,7 @@ class TestAmenity(unittest.TestCase):
 
     def test_to_dict_values(self):
         """test that values in dict returned from to_dict are correct"""
-        t_format = "%Y-%m-%dT%H:%M:%S"
+        t_format = "%Y-%m-%dT%H:%M:%S.%f"
         am = Amenity()
         new_d = am.to_dict()
         self.assertEqual(new_d["__class__"], "Amenity")

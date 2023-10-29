@@ -6,7 +6,6 @@ Contains the TestDBStorageDocs and TestDBStorage classes
 from datetime import datetime
 import inspect
 import models
-from models import storage
 from models.engine import db_storage
 from models.amenity import Amenity
 from models.base_model import BaseModel
@@ -88,29 +87,50 @@ class TestFileStorage(unittest.TestCase):
     def test_save(self):
         """Test that save properly saves objects to file.json"""
 
-    def test_db_counter(self):
-        """Test count db storage"""
-        jsonData = {"name": "vatican light rainbows"}
-        state = State(**jsonData)
-        storage.new(state)
-        jsonData = {"name": "newyork", "state_id": state.id}
-        city = City(**jsonData)
-        storage.new(city)
-        storage.save()
-        res = storage.count()
-        self.assertEqual(
-            len(storage.all()),
-            res
-        )
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    def test_get(self):
+        """test doc doc"""
+        state1 = State(name="state1")
+        state2 = State(name="state2")
+        state3 = State(name="state3")
+        models.storage.new(state1)
+        models.storage.new(state2)
+        models.storage.new(state3)
+        models.storage.save()
+        models.storage.close()
+        first_state = list(models.storage.all().values())[2]
+        first_state_id = first_state.id
+        get = models.storage.get(State, first_state_id)
+        self.assertEqual(get.id, first_state_id)
+        models.storage.delete(get)
+        models.storage.save()
+        models.storage.close()
+        get = models.storage.get(State, first_state_id)
+        self.assertEqual(get, None)
 
-    def test_db_getter(self):
-        """Tests that obtains a db storage instance"""
-        jsonData = {"name": "powerrangers vatican HQ"}
-        instObj = State(**jsonData)
-        storage.new(instObj)
-        storage.save()
-        getInstObj = storage.get(State, instObj.id)
-        self.assertEqual(
-            getInstObj,
-            instObj
-        )
+
+class TestFileStorage2(unittest.TestCase):
+    """test doc doc"""
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    def test_count(self):
+        """test doc doc"""
+        state1 = State(name="state1")
+        state2 = State(name="state2")
+        state3 = State(name="state3")
+        city1 = City(state_id=state1.id, name="San Francisco")
+        city2 = City(state_id=state2.id, name="San Francisco2")
+        city3 = City(state_id=state3.id, name="San Francisco3")
+        models.storage.new(state1)
+        models.storage.new(state2)
+        models.storage.new(state3)
+        models.storage.new(city1)
+        models.storage.new(city2)
+        models.storage.new(city3)
+        models.storage.save()
+        models.storage.close()
+        total = len(models.storage.all())
+        total_state = len(models.storage.all(State))
+        count_total = models.storage.count()
+        count_state = models.storage.count(State)
+        self.assertEqual(total, count_total)
+        self.assertEqual(total_state, count_state)
