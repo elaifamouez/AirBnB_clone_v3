@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 """ holds class User"""
 import models
-import hashlib
 from models.base_model import BaseModel, Base
 from os import getenv
 import sqlalchemy
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
+from hashlib import md5 as hashit
 
 
 class User(BaseModel, Base):
@@ -29,7 +29,10 @@ class User(BaseModel, Base):
         """initializes user"""
         super().__init__(*args, **kwargs)
 
-        # encrypt the password
-        passw = hashlib.md5(self.password.encode())
-        password = passw.hexdigest()
-        self.password = password
+    def __setattr__(self, key, value):
+        """sets hashed password instead of plain text"""
+        if key == "password":
+            value = hashit(
+                value.encode()
+                ).hexdigest()
+        super().__setattr__(key, value)
